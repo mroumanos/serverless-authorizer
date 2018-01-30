@@ -1,0 +1,56 @@
+service: lambda-authorizer # NOTE: update this with your service name
+frameworkVersion: "=1.16.1"
+
+provider:
+  name: aws
+  runtime: python3.6
+
+functions:
+  authorizer:
+    handler: authorizer/wrap.handler
+    role: authorizerLambdaExecutionRole
+    package:
+      include:
+        - authorizer/**
+
+resources:
+  Resources:
+    authorizerLambdaExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName: authorizerLambdaExecutionRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: authorizerLambdaLogPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - 'Fn::Join':
+                      - ':'
+                      -
+                        - 'arn:aws:logs'
+                        - Ref: 'AWS::Region'
+                        - Ref: 'AWS::AccountId'
+                        - 'log-group:/aws/lambda/*:*:*'
+
+custom:
+  pyIndividually:
+    wrap:authorizer: authorizer/handler.lambda_handler
+    dockerizedPip: true
+
+plugins:
+  - serverless-python-individually
