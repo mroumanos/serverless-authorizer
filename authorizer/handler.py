@@ -21,13 +21,14 @@ def lambda_handler(event, context):
 
         if 'headers' in event:
             cookie = event['headers']['Cookie']
-            charset = re.findall(cookie_re, cookie)
-            if len(charset):
-                token = charset[0]
-            else:
-                token = event['headers']['Cookie']
         else:
-            token = event['authorizationToken']
+            cookie = event['authorizationToken']
+
+        charset = re.findall(cookie_re, cookie)
+        if len(charset):
+            token = charset[0]
+        else:
+            token = cookie
 
         method = event['methodArn']
 
