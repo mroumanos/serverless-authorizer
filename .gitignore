@@ -21,7 +21,7 @@ var/
 
 # General
 node_modules
-key.json
+key.*
 package-lock.json
 .idea/
 *.pyc
